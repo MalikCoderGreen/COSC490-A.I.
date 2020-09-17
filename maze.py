@@ -1,8 +1,8 @@
 import pygame, sys
 import random
 import numpy as np
-#import df.py as df
-
+import DecisionFactory as DF
+import time
 
 #Colors
 Black = (0, 0, 0)
@@ -38,7 +38,7 @@ for row in range(10):
     for column in range(10):
         grid[row].append(0)  # Append a cell
 
-
+# creates our blank maze, fills in every space as a white tile
 for row in range(10):
     for col in range(10):
 
@@ -51,28 +51,111 @@ for row in range(10):
                               W,
                               H])
 
+# intializes our portal and agent coordinates to 0
+# px, py = Portal (x,y) ax,ay = Agent (x,y)
+px = py = ax = ay = 0
 
-x = random.randrange(0, 10)
-y = random.randrange(0, 10)
+# rerolls coordinates until the two are not equal
+while px == ax and py == ay:
+    px = random.randrange(0, 10)
+    py = random.randrange(0, 10)
+    ax = random.randrange(0, 10)
+    ay = random.randrange(0, 10)
 
-
-pygame.draw.rect(screen, Red, [(Marg + W) * y + Marg,
-                      (Marg + H) * x + Marg,
+# creates our red portal for our agent
+pygame.draw.rect(screen, Red, [(Marg + W) * py + Marg,
+                      (Marg + H) * px + Marg,
                       W,
                       H])
-print(x)
+
+# creates our green agent
+pygame.draw.rect(screen, Green, [(Marg + W) * ay + Marg,
+                      (Marg + H) * ax + Marg,
+                      W,
+                      H])
 #screen set up.
+
+#create our class object
+AM = DF.DecisionFactory()
+
+#init step count
+step = 0
+
 run = True
 while run:
+    step = step + 1
+
+    move_status = 'success'
+
+    # AM makes a move
+    # AM asks its class to get a random direction
+    direction = AM.get_decision()
+    # we then use that direction to ensure a valid move for AM
+    # if the direction is valid, we graphically update the screen, making the old square white and changing his position
+    if direction == 'up':
+        if (ay - 1) >= 0:
+            pygame.draw.rect(screen, White, [(Marg + W) * ay + Marg,
+                      (Marg + H) * ax + Marg,
+                      W,
+                      H])
+            ay = ay - 1
+        else:
+            move_status = 'failure'
+    elif direction == 'down':
+        if (ay + 1) < 10:
+            pygame.draw.rect(screen, White, [(Marg + W) * ay + Marg,
+                      (Marg + H) * ax + Marg,
+                      W,
+                      H])
+            ay = ay + 1
+        else:
+            move_status = 'failure'
+    elif direction == 'left':
+        if (ax - 1) >= 0:
+            pygame.draw.rect(screen, White, [(Marg + W) * ay + Marg,
+                      (Marg + H) * ax + Marg,
+                      W,
+                      H])
+            ax = ax - 1
+        else:
+            move_status = 'failure'
+    elif direction == 'right':
+        if (ax + 1) < 10:
+            pygame.draw.rect(screen, White, [(Marg + W) * ay + Marg,
+                      (Marg + H) * ax + Marg,
+                      W,
+                      H])
+            ax = ax + 1
+        else:
+            move_status = 'failure'
+    elif direction == 'wait':
+        pass
+    
+    # if our agent moved, we then have to redraw him on the correct hex for the GUI
+
+    if move_status == 'success':
+        pygame.draw.rect(screen, Green, [(Marg + W) * ay + Marg,
+                      (Marg + H) * ax + Marg,
+                      W,
+                      H])
+
+    # check win condition
+    if ax == px and ay == py:
+        run = False
+        move_status = 'portal'
+
+    # return move_status to AM
+    AM.put_result(move_status)
+
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             run = False
         #elif event.type == pygame.MOUSEBUTTONDOWN:
-
-
-
-
-
     pygame.display.flip()
 
+    #This exists for sake of the GUI's representation
+    time.sleep(0.1)
 pygame.quit()
+
+#print win
+print("It took", step, "# of steps to win.")
