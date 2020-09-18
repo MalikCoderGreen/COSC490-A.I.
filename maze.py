@@ -159,3 +159,10 @@ pygame.quit()
 
 #print win
 print("It took", step, "# of steps to win.")
+
+#save result to disk
+"""
+with open('results.txt', 'a') as save:
+    save.write(str(step))
+    save.write('\n')
+"""
