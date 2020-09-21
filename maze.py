@@ -9,6 +9,7 @@ Black = (0, 0, 0)
 White = (255, 255, 255)
 Green = (0, 255, 0)
 Red = (255, 0, 0)
+Blue = (0, 0, 255)
 
 pygame.init()
 
@@ -41,15 +42,35 @@ for row in range(10):
 # creates our blank maze, fills in every space as a white tile
 for row in range(10):
     for col in range(10):
-
         color = White
-
-
-
         pygame.draw.rect(screen, color, [(Marg + W) * col + Marg,
                               (Marg + H) * row + Marg,
                               W,
                               H])
+
+# fills in our walls around the perimeter of the maze
+for x in range(10):
+    color = Blue
+    grid[0][x] = "Wall"
+    pygame.draw.rect(screen, color, [(Marg + W) * x + Marg,
+                          (Marg + H) * 0 + Marg,
+                          W,
+                          H])
+    grid[x][0] = "Wall"
+    pygame.draw.rect(screen, color, [(Marg + W) * 0 + Marg,
+                          (Marg + H) * x + Marg,
+                          W,
+                          H])
+    grid[9][x] = "Wall"
+    pygame.draw.rect(screen, color, [(Marg + W) * x + Marg,
+                          (Marg + H) * 9 + Marg,
+                          W,
+                          H])
+    grid[x][9] = "Wall"
+    pygame.draw.rect(screen, color, [(Marg + W) * 9 + Marg,
+                          (Marg + H) * x + Marg,
+                          W,
+                          H])
 
 # intializes our portal and agent coordinates to 0
 # px, py = Portal (x,y) ax,ay = Agent (x,y)
@@ -57,10 +78,10 @@ px = py = ax = ay = 0
 
 # rerolls coordinates until the two are not equal
 while px == ax and py == ay:
-    px = random.randrange(0, 10)
-    py = random.randrange(0, 10)
-    ax = random.randrange(0, 10)
-    ay = random.randrange(0, 10)
+    px = random.randrange(1, 9)
+    py = random.randrange(1, 9)
+    ax = random.randrange(1, 9)
+    ay = random.randrange(1, 9)
 
 # creates our red portal for our agent
 pygame.draw.rect(screen, Red, [(Marg + W) * py + Marg,
@@ -93,7 +114,7 @@ while run:
     # we then use that direction to ensure a valid move for AM
     # if the direction is valid, we graphically update the screen, making the old square white and changing his position
     if direction == 'up':
-        if (ay - 1) >= 0:
+        if (grid[ay - 1][ax]) != "Wall":
             pygame.draw.rect(screen, White, [(Marg + W) * ay + Marg,
                       (Marg + H) * ax + Marg,
                       W,
@@ -102,7 +123,7 @@ while run:
         else:
             move_status = 'failure'
     elif direction == 'down':
-        if (ay + 1) < 10:
+        if (grid[ay + 1][ax]) != "Wall":
             pygame.draw.rect(screen, White, [(Marg + W) * ay + Marg,
                       (Marg + H) * ax + Marg,
                       W,
@@ -111,7 +132,7 @@ while run:
         else:
             move_status = 'failure'
     elif direction == 'left':
-        if (ax - 1) >= 0:
+        if (grid[ay][ax - 1]) != "Wall":
             pygame.draw.rect(screen, White, [(Marg + W) * ay + Marg,
                       (Marg + H) * ax + Marg,
                       W,
@@ -120,7 +141,7 @@ while run:
         else:
             move_status = 'failure'
     elif direction == 'right':
-        if (ax + 1) < 10:
+        if (grid[ay][ax + 1]) != "Wall":
             pygame.draw.rect(screen, White, [(Marg + W) * ay + Marg,
                       (Marg + H) * ax + Marg,
                       W,
@@ -159,3 +180,10 @@ pygame.quit()
 
 #print win
 print("It took", step, "# of steps to win.")
+
+#save result to disk
+"""
+with open('results.txt', 'a') as save:
+    save.write(str(step))
+    save.write('\n')
+"""
